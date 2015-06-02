@@ -386,7 +386,8 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Run HITS for a fixed number of iterations returning a graph with vertex attributes
-   * containing the HITS scores in the form (authScore, hubScore) and empty edge attributes.
+   * containing the HITS scores as a tuple (auth, hub) of authority and hub scores, respectively,
+   * and empty edge attributes.
    *
    * @see [[org.apache.spark.graphx.lib.HITS$#run]]
    */

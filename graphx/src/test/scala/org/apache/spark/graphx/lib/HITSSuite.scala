@@ -47,7 +47,7 @@ object GridHITS {
     var hits = Array.fill(nRows * nCols)((1.0, 1.0))
     var norm = 0.0
     for (iter <- 0 until nIter) {
-      // Compute authScore
+      // Compute auth score
       for (ind <- 0 until (nRows * nCols)) {
         hits(ind) = (
           inNbrs(ind).map { nbr => hits(nbr) match { case (auth, hub) => hub }}.sum,
@@ -56,7 +56,7 @@ object GridHITS {
       }
       norm = math.sqrt(hits.map { case (auth, hub) => auth * auth }.sum)
       hits = hits.map { case (auth, hub) => (auth / norm, hub) }
-      // Compute hubScore
+      // Compute hub score
       for (ind <- 0 until (nRows * nCols)) {
         hits(ind) = (
           hits(ind) match { case (auth, hub) => auth },
@@ -87,7 +87,7 @@ class HITSSuite extends FunSuite with LocalSparkContext {
       val starGraph = GraphGenerators.starGraph(sc, nVertices).cache()
       val errorTol = 1.0e-5
 
-      val staticScores1 = starGraph.staticHITS(numIter = 1).vertices.cache()
+      val staticScores1 = starGraph.staticHITS(numIter = 1).vertices
       val staticScores2 = starGraph.staticHITS(numIter = 2).vertices.cache()
 
       // Static HITS should only take 2 iterations to converge
@@ -96,6 +96,7 @@ class HITSSuite extends FunSuite with LocalSparkContext {
       }.map { case (id, test) => test }.sum()
       assert(notMatching === 0)
 
+      // Compare against exact HITS scores.
       val staticErrors = staticScores2.map { case (id, (auth, hub)) =>
         val p = math.abs(hub - 1.0 / math.sqrt(nVertices - 1))
         val correct = (id >  0  && auth == 0.0 && p < errorTol) ||
@@ -110,7 +111,6 @@ class HITSSuite extends FunSuite with LocalSparkContext {
     withSpark { sc =>
       val rows = 10
       val cols = 10
-      val tol = 0.0001
       val numIter = 10
       val errorTol = 1.0e-5
       val gridGraph = GraphGenerators.gridGraph(sc, rows, cols).cache()
@@ -132,7 +132,7 @@ class HITSSuite extends FunSuite with LocalSparkContext {
       val numIter = 10
       val errorTol = 1.0e-5
 
-      val staticScores1 = chain.staticHITS(numIter = 1).vertices.cache()
+      val staticScores1 = chain.staticHITS(numIter = 1).vertices
       val staticScores2 = chain.staticHITS(numIter = 2).vertices.cache()
 
       // Static HITS should only take 2 iterations to converge
@@ -141,6 +141,7 @@ class HITSSuite extends FunSuite with LocalSparkContext {
       }.map { case (id, test) => test }.sum()
       assert(notMatching === 0)
 
+      // Compare against exact HITS scores.
       val staticErrors = staticScores2.map { case (id, (auth, hub)) =>
         val s = 1.0 / math.sqrt(n)
         val pa = math.abs(auth - s)
