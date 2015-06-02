@@ -129,7 +129,6 @@ class HITSSuite extends FunSuite with LocalSparkContext {
       val chain1 = (0 until n).map(x => (x, x + 1))
       val rawEdges = sc.parallelize(chain1, 1).map { case (s, d) => (s.toLong, d.toLong) }
       val chain = Graph.fromEdgeTuples(rawEdges, 1.0).cache()
-      val numIter = 10
       val errorTol = 1.0e-5
 
       val staticScores1 = chain.staticHITS(numIter = 1).vertices
