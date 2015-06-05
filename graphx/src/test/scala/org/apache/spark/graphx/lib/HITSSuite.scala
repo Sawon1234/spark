@@ -113,11 +113,10 @@ class HITSSuite extends FunSuite with LocalSparkContext {
       val cols = 10
       val numIter = 10
       val errorTol = 1.0e-5
-      val gridGraph = GraphGenerators.gridGraph(sc, rows, cols).cache()
+      val gridGraph = GraphGenerators.gridGraph(sc, rows, cols)
 
-      val staticScores = gridGraph.staticHITS(numIter).vertices.cache()
-      val referenceScores = VertexRDD(
-        sc.parallelize(GridHITS(rows, cols, numIter))).cache()
+      val staticScores = gridGraph.staticHITS(numIter).vertices
+      val referenceScores = VertexRDD(sc.parallelize(GridHITS(rows, cols, numIter)))
 
       assert(compareScores(staticScores, referenceScores) < errorTol)
     }

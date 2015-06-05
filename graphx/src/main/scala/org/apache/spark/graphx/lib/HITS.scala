@@ -97,7 +97,6 @@ object HITS extends Logging {
 
       // Normalize auth scores.
       val authScores = initAuthScores.mapValues(score => score / authNorm)
-      initAuthScores.unpersist()
 
       // Apply new auth scores, using outerJoin to set scores of vertices that didn't receive a
       // message to 0.0. Requires a shuffle for broadcasting updated scores to the edge partitions.
@@ -109,6 +108,7 @@ object HITS extends Logging {
         }
       }.cache()
       scoreGraph.edges.foreachPartition(x => {}) // also materializes scoreGraph.vertices
+      initAuthScores.unpersist()
       prevScoreGraph.unpersist()
 
       // Compute the unnormalized hub score contributions of each vertex, perform local
@@ -127,7 +127,6 @@ object HITS extends Logging {
 
       // Normalize hub scores.
       val hubScores = initHubScores.mapValues(score => score / hubNorm).cache()
-      initHubScores.unpersist()
 
       // Apply new hub scores, using outerJoin to set scores of vertices that didn't receive a
       // message to 0.0. Requires a shuffle for broadcasting updated scores to the edge partitions.
@@ -139,6 +138,7 @@ object HITS extends Logging {
         }
       }.cache()
       scoreGraph.edges.foreachPartition(x => {}) // also materializes scoreGraph.vertices
+      initHubScores.unpersist()
       prevScoreGraph.unpersist()
 
       logInfo(s"HITS finished iteration $iteration.")
